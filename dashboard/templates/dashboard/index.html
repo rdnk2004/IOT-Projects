@@ -1,0 +1,194 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IoT Temperature Monitoring System</title>
+    
+    <!-- Google Fonts & FontAwesome -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- Custom Style Sheet -->
+    <link rel="stylesheet" href="{% static 'dashboard/css/styles.css' %}">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Dashboard Header -->
+        <header>
+            <div class="brand-section">
+                <div class="brand-logo">
+                    <i class="fa-solid fa-temperature-half fa-2xl" style="color: #58a6ff;"></i>
+                </div>
+                <div>
+                    <h1>TempSync</h1>
+                    <div class="db-indicator">
+                        <span class="indicator-dot active" id="db-dot"></span>
+                        <span id="db-label">Supabase Cloud</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="user-controls">
+                <div class="username">
+                    Welcome, <span>{{ user.username }}</span>
+                </div>
+                <a href="{% url 'logout' %}" class="btn btn-danger">
+                    <i class="fa-solid fa-right-from-bracket"></i> Logout
+                </a>
+            </div>
+        </header>
+
+        <!-- Metric Statistics Grid -->
+        <div class="metrics-grid">
+            <!-- Latest Reading Card -->
+            <div class="metric-card latest">
+                <div class="metric-title">Latest Temperature</div>
+                <div class="metric-value" id="latest-value">--<span class="metric-unit">°C</span></div>
+                <div class="metric-meta" id="latest-time">No readings available</div>
+            </div>
+            
+            <!-- Average Temperature Card -->
+            <div class="metric-card avg">
+                <div class="metric-title">Average Temperature</div>
+                <div class="metric-value" id="avg-value">--<span class="metric-unit">°C</span></div>
+                <div class="metric-meta" id="avg-count">No records</div>
+            </div>
+            
+            <!-- Minimum Temperature Card -->
+            <div class="metric-card min">
+                <div class="metric-title">Minimum Temperature</div>
+                <div class="metric-value" id="min-value">--<span class="metric-unit">°C</span></div>
+                <div class="metric-meta" id="min-time">N/A</div>
+            </div>
+            
+            <!-- Maximum Temperature Card -->
+            <div class="metric-card max">
+                <div class="metric-title">Maximum Temperature</div>
+                <div class="metric-value" id="max-value">--<span class="metric-unit">°C</span></div>
+                <div class="metric-meta" id="max-time">N/A</div>
+            </div>
+        </div>
+
+        <!-- Dashboard Control Bar -->
+        <div class="controls-panel">
+            <!-- Filters form -->
+            <form class="filter-form" id="filter-form">
+                <div class="filter-inputs">
+                    <label for="start-date">From:</label>
+                    <input type="date" id="start-date" name="start_date">
+                    
+                    <label for="end-date">To:</label>
+                    <input type="date" id="end-date" name="end_date">
+                </div>
+                <div class="action-buttons">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fa-solid fa-filter"></i> Filter
+                    </button>
+                    <button type="button" class="btn btn-secondary" id="reset-btn">
+                        <i class="fa-solid fa-rotate-left"></i> Reset
+                    </button>
+                </div>
+            </form>
+            
+            <!-- Refresh controls and Export -->
+            <div class="refresh-section">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="auto-refresh" checked>
+                        <span class="slider"></span>
+                    </label>
+                    <span class="toggle-label">Auto Refresh (5s)</span>
+                </div>
+                
+                <div class="action-buttons">
+                    <button class="btn btn-secondary" id="reload-btn" title="Reload raw data">
+                        <i class="fa-solid fa-arrows-rotate"></i> Reload
+                    </button>
+                    <button class="btn btn-success" id="export-btn">
+                        <i class="fa-solid fa-file-csv"></i> Export CSV
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Temperature Trend Chart Card -->
+        <div class="visualization-card" style="position: relative;">
+            <div class="loader-container" id="loader">
+                <div class="spinner"></div>
+            </div>
+            
+            <div class="card-title">
+                <span>Temperature Trend</span>
+                <span style="font-size: 0.8rem; font-weight: 500; color: var(--text-secondary);">Real-Time Line Chart</span>
+            </div>
+            <div class="chart-container">
+                <canvas id="temperatureChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Temperature Readings Table Card -->
+        <div class="table-card">
+            <div class="card-title">
+                <span>Temperature Logs</span>
+            </div>
+            
+            <div class="table-wrapper">
+                <table id="readings-table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Time</th>
+                            <th>Temperature</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Injected via JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Table Pagination controls -->
+            <div class="pagination-controls">
+                <div class="page-info">
+                    Page <span id="page-num">1</span> of <span id="page-total">1</span>
+                </div>
+                <div class="pagination-buttons">
+                    <button class="btn btn-secondary" id="prev-page" disabled>
+                        <i class="fa-solid fa-chevron-left"></i> Previous
+                    </button>
+                    <button class="btn btn-secondary" id="next-page" disabled>
+                        Next <i class="fa-solid fa-chevron-right"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Script to indicate which database is currently being used -->
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const isSupabase = {% if use_supabase %}true{% else %}false{% endif %};
+            const dot = document.getElementById("db-dot");
+            const label = document.getElementById("db-label");
+            
+            if (isSupabase) {
+                dot.className = "indicator-dot active";
+                label.innerText = "Supabase Cloud";
+            } else {
+                dot.className = "indicator-dot local";
+                label.innerText = "Local SQLite (data.sqlite3)";
+            }
+        });
+    </script>
+    
+    <!-- Custom Application Javascript -->
+    <script src="{% static 'dashboard/js/app.js' %}"></script>
+</body>
+</html>
