@@ -174,7 +174,7 @@
     <!-- Script to indicate which database is currently being used -->
     <script>
         document.addEventListener("DOMContentLoaded", () => {
-            const isSupabase = {% if use_supabase %}true{% else %}false{% endif %};
+            const isSupabase = "{{ use_supabase|yesno:'true,false' }}" === "true";
             const dot = document.getElementById("db-dot");
             const label = document.getElementById("db-label");
             
