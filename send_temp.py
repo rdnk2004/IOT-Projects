@@ -1,20 +1,14 @@
 import os
 import random
 import time
+# pyrefly: ignore [missing-import]
 from dotenv import load_dotenv
+# pyrefly: ignore [missing-import]
 from supabase import create_client
-
 load_dotenv()
-
 url = os.getenv("SUPABASE_URL")
 key = os.getenv("SUPABASE_KEY")
-
-if not url or not key or url == "YOUR_SUPABASE_URL":
-    print("Please set SUPABASE_URL and SUPABASE_KEY in your .env file.")
-    exit(1)
-
 supabase = create_client(url, key)
-
 while True:
     temp = random.randint(25, 40)
     supabase.table("temperature").insert({"temp": temp}).execute()

@@ -2,9 +2,15 @@ import json
 import random
 import time
 # pyrefly: ignore [missing-import]
-import paho.mqtt.client as mqtt
+from dotenv import load_dotenv
+# pyrefly: ignore [missing-import]
+import os
+# pyrefly: ignore [missing-import]
+import paho.mqtt.client as mqtt 
+
+load_dotenv()
 broker = "eu.thingsboard.cloud"
-access_token = "BAxxM7DR25d2YBwFYD5b"
+access_token = os.getenv("ACCESS_TOKEN")
 try:
     client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION1)
 except AttributeError:
