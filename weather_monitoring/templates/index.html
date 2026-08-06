@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kochi IoT Weather Monitoring & Analytics</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
+    <!-- Custom Glassmorphism Styles -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+    <!-- Navigation Bar -->
+    <nav class="navbar navbar-expand-lg navbar-custom sticky-top">
+        <div class="container-fluid px-4">
+            <a class="navbar-brand d-flex align-items-center" href="/">
+                <i class="fa-solid fa-temperature-arrow-up me-2 text-info"></i>
+                <span>Kochi IoT Weather Analytics</span>
+            </a>
+            <button class="navbar-toggler text-white" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/"><i class="fa-solid fa-chart-line me-1"></i> Live Dashboard</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/analytics"><i class="fa-solid fa-calculator me-1"></i> Statistical Analysis</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/report"><i class="fa-solid fa-file-contract me-1"></i> Daily Summary Report</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Container -->
+    <div class="container-fluid px-4 py-4">
+
+        <!-- Top Header & Controls -->
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
+            <div>
+                <h2 class="fw-bold mb-1">
+                    <span class="live-pulse"></span> Kochi Live Temperature Telemetry
+                </h2>
+                <p class="text-secondary mb-0">
+                    Real-time IoT data stream from Open-Meteo API • Kochi (9.9312° N, 76.2673° E)
+                </p>
+            </div>
+            <div class="d-flex align-items-center gap-2">
+                <span class="text-secondary small">
+                    Last updated: <span id="last-refreshed" class="fw-medium text-light">--:--:--</span>
+                </span>
+                <button id="btn-manual-refresh" class="btn btn-custom-primary btn-sm">
+                    <i class="fa-solid fa-rotate me-1"></i> Fetch Now
+                </button>
+            </div>
+        </div>
+
+        <!-- Live Metrics Cards Row -->
+        <div class="row g-4 mb-4">
+            <!-- Current Temperature Hero -->
+            <div class="col-12 col-lg-4">
+                <div class="glass-card temp-hero h-100 d-flex flex-column justify-content-center">
+                    <div class="metric-label text-info">Current Temperature</div>
+                    <div class="temp-hero-val mb-2">
+                        <span id="current-temp-val">{{ latest.temperature if latest else '--' }}</span><span class="fs-2 text-info">°C</span>
+                    </div>
+                    <div class="text-secondary small">
+                        <i class="fa-solid fa-location-dot me-1 text-danger"></i> Kochi, Kerala • 
+                        <span id="current-timestamp">{{ latest.formatted_time if latest else 'Loading...' }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Supporting Telemetry Metrics -->
+            <div class="col-12 col-lg-8">
+                <div class="row g-3">
+                    <div class="col-6 col-md-4">
+                        <div class="glass-card metric-card amber h-100">
+                            <div class="metric-label">Apparent Temp</div>
+                            <div class="metric-value text-amber">
+                                <span id="current-apparent-val">{{ latest.apparent_temperature if latest else '--' }}</span>
+                                <span class="metric-unit">°C</span>
+                            </div>
+                            <div class="text-secondary small mt-2">Thermal Feel Index</div>
+                        </div>
+                    </div>
+
+                    <div class="col-6 col-md-4">
+                        <div class="glass-card metric-card blue h-100">
+                            <div class="metric-label">Relative Humidity</div>
+                            <div class="metric-value text-info">
+                                <span id="current-humidity-val">{{ latest.humidity if latest else '--' }}</span>
+                                <span class="metric-unit">%</span>
+                            </div>
+                            <div class="text-secondary small mt-2">Coastal Moisture Level</div>
+                        </div>
+                    </div>
+
+                    <div class="col-12 col-md-4">
+                        <div class="glass-card metric-card emerald h-100">
+                            <div class="metric-label">Wind Velocity</div>
+                            <div class="metric-value text-emerald">
+                                <span id="current-wind-val">{{ latest.wind_speed if latest else '--' }}</span>
+                                <span class="metric-unit">km/h</span>
+                            </div>
+                            <div class="text-secondary small mt-2">Surface Wind Speed</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Matplotlib Time Series Chart Section -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="glass-card">
+                    <div class="glass-card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0 fw-semibold">
+                            <i class="fa-solid fa-chart-area me-2 text-info"></i> Temperature Variation Over Time (Matplotlib Line Chart)
+                        </h5>
+                        <span class="badge bg-primary bg-opacity-25 text-info px-3 py-2">
+                            <i class="fa-solid fa-chart-line me-1"></i> Solely Python Matplotlib
+                        </span>
+                    </div>
+                    <div class="p-4 text-center">
+                        <img id="matplotlib-temp-chart" 
+                             src="{{ url_for('static', filename='charts/temp_time_series.png') }}?v={{ range(1, 100000) | random }}" 
+                             alt="Matplotlib Temperature Time Series Chart" class="img-fluid rounded-3 shadow">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Telemetry Data History Table -->
+        <div class="row">
+            <div class="col-12">
+                <div class="glass-card">
+                    <div class="glass-card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0 fw-semibold">
+                            <i class="fa-solid fa-database me-2 text-indigo"></i> Stored Cloud Telemetry Readings History
+                        </h5>
+                        <a href="/analytics" class="btn btn-outline-light btn-sm rounded-3">
+                            <i class="fa-solid fa-square-poll-vertical me-1"></i> View Full Analytics
+                        </a>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-custom">
+                            <thead>
+                                <tr>
+                                    <th>Timestamp</th>
+                                    <th>Temperature (°C)</th>
+                                    <th>Apparent (°C)</th>
+                                    <th>Humidity (%)</th>
+                                    <th>Wind Speed (km/h)</th>
+                                    <th>Location</th>
+                                </tr>
+                            </thead>
+                            <tbody id="history-tbody">
+                                <tr>
+                                    <td colspan="6" class="text-center py-4 text-secondary">Loading telemetry logs...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Bootstrap 5 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/bootstrap.bundle.min.js"></script>
+    <!-- Custom Dashboard Script (No JS Charting Libraries) -->
+    <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+</body>
+</html>

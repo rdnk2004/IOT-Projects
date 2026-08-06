@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daily Statistical & Time Series Analysis - Kochi IoT</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
+    <!-- Custom Glassmorphism Styles -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+    <!-- Navigation Bar -->
+    <nav class="navbar navbar-expand-lg navbar-custom sticky-top">
+        <div class="container-fluid px-4">
+            <a class="navbar-brand d-flex align-items-center" href="/">
+                <i class="fa-solid fa-temperature-arrow-up me-2 text-info"></i>
+                <span>Kochi IoT Weather Analytics</span>
+            </a>
+            <button class="navbar-toggler text-white" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/"><i class="fa-solid fa-chart-line me-1"></i> Live Dashboard</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/analytics"><i class="fa-solid fa-calculator me-1"></i> Statistical Analysis</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/report"><i class="fa-solid fa-file-contract me-1"></i> Daily Summary Report</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Container -->
+    <div class="container-fluid px-4 py-4">
+
+        <!-- Header & Date Picker Filter -->
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
+            <div>
+                <h2 class="fw-bold mb-1">
+                    <i class="fa-solid fa-calculator text-indigo me-2"></i> Daily Statistical & Time Series Analysis
+                </h2>
+                <p class="text-secondary mb-0">
+                    Comprehensive pandas-computed statistical measures and Matplotlib diurnal temperature breakdown for Kochi.
+                </p>
+            </div>
+            <form method="GET" action="/analytics" class="d-flex align-items-center gap-2">
+                <label class="text-secondary small fw-medium">Analysis Date:</label>
+                <input type="date" name="date" class="form-control form-control-sm bg-dark text-white border-secondary rounded-3" 
+                       value="{{ selected_date }}" onchange="this.form.submit()">
+            </form>
+        </div>
+
+        <!-- Statistical Analysis Metrics Grid (8 Mandatory Measures) -->
+        <h5 class="fw-semibold text-info mb-3">
+            <i class="fa-solid fa-square-poll-vertical me-2"></i> Daily Temperature Statistical Indicators
+        </h5>
+        
+        <div class="row g-3 mb-4">
+            <!-- Mean Temperature -->
+            <div class="col-6 col-md-3">
+                <div class="glass-card metric-card blue h-100">
+                    <div class="metric-label">Mean Temperature</div>
+                    <div class="metric-value text-info">
+                        {{ stats.mean if stats.mean is not none else 'N/A' }} <span class="metric-unit">°C</span>
+                    </div>
+                    <div class="text-secondary small mt-2">Arithmetic Average</div>
+                </div>
+            </div>
+
+            <!-- Median Temperature -->
+            <div class="col-6 col-md-3">
+                <div class="glass-card metric-card emerald h-100">
+                    <div class="metric-label">Median Temperature</div>
+                    <div class="metric-value text-emerald">
+                        {{ stats.median if stats.median is not none else 'N/A' }} <span class="metric-unit">°C</span>
+                    </div>
+                    <div class="text-secondary small mt-2">Middle Value</div>
+                </div>
+            </div>
+
+            <!-- Mode Temperature -->
+            <div class="col-6 col-md-3">
+                <div class="glass-card metric-card amber h-100">
+                    <div class="metric-label">Mode Temperature</div>
+                    <div class="metric-value text-amber">
+                        {{ stats.mode if stats.mode is not none else 'N/A' }} <span class="metric-unit">°C</span>
+                    </div>
+                    <div class="text-secondary small mt-2">Most Frequent Value</div>
+                </div>
+            </div>
+
+            <!-- Temperature Range -->
+            <div class="col-6 col-md-3">
+                <div class="glass-card metric-card rose h-100">
+                    <div class="metric-label">Temperature Range</div>
+                    <div class="metric-value text-rose">
+                        {{ stats.range if stats.range is not none else 'N/A' }} <span class="metric-unit">°C</span>
+                    </div>
+                    <div class="text-secondary small mt-2">Max - Min Difference</div>
+                </div>
+            </div>
+
+            <!-- Maximum Temperature -->
+            <div class="col-6 col-md-3">
+                <div class="glass-card metric-card rose h-100">
+                    <div class="metric-label">Maximum Temperature</div>
+                    <div class="metric-value text-rose">
+                        {{ stats.max if stats.max is not none else 'N/A' }} <span class="metric-unit">°C</span>
+                    </div>
+                    <div class="text-secondary small mt-2">Peak Thermal Extreme</div>
+                </div>
+            </div>
+
+            <!-- Minimum Temperature -->
+            <div class="col-6 col-md-3">
+                <div class="glass-card metric-card blue h-100">
+                    <div class="metric-label">Minimum Temperature</div>
+                    <div class="metric-value text-info">
+                        {{ stats.min if stats.min is not none else 'N/A' }} <span class="metric-unit">°C</span>
+                    </div>
+                    <div class="text-secondary small mt-2">Lowest Thermal Extreme</div>
+                </div>
+            </div>
+
+            <!-- Variance -->
+            <div class="col-6 col-md-3">
+                <div class="glass-card metric-card amber h-100">
+                    <div class="metric-label">Variance</div>
+                    <div class="metric-value text-amber">
+                        {{ stats.variance if stats.variance is not none else 'N/A' }} <span class="metric-unit">°C²</span>
+                    </div>
+                    <div class="text-secondary small mt-2">Sample Variance (s²)</div>
+                </div>
+            </div>
+
+            <!-- Standard Deviation -->
+            <div class="col-6 col-md-3">
+                <div class="glass-card metric-card emerald h-100">
+                    <div class="metric-label">Std Deviation</div>
+                    <div class="metric-value text-emerald">
+                        {{ stats.std_dev if stats.std_dev is not none else 'N/A' }} <span class="metric-unit">°C</span>
+                    </div>
+                    <div class="text-secondary small mt-2">Thermal Dispersion (s)</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Time Series Extremes & Hourly Trends -->
+        <h5 class="fw-semibold text-info mb-3">
+            <i class="fa-solid fa-clock-rotate-left me-2"></i> Time Series Extremes & Hourly Trends
+        </h5>
+
+        <div class="row g-4 mb-4">
+            <!-- Max Temperature Timestamp Occurrence -->
+            <div class="col-12 col-md-6">
+                <div class="glass-card p-4 h-100 border-start border-4 border-danger">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <span class="badge bg-danger bg-opacity-25 text-danger px-3 py-2 fs-6">
+                            <i class="fa-solid fa-temperature-high me-1"></i> Maximum Occurrence
+                        </span>
+                        <span class="fs-4 fw-bold text-danger">{{ ts.max_info.temperature if ts.max_info.temperature is not none else 'N/A' }} °C</span>
+                    </div>
+                    <p class="text-secondary mb-1">Exact Time of Highest Temperature:</p>
+                    <h4 class="fw-bold text-light mb-0">
+                        {{ ts.max_info.formatted_time if ts.max_info.formatted_time else 'No readings' }}
+                    </h4>
+                </div>
+            </div>
+
+            <!-- Min Temperature Timestamp Occurrence -->
+            <div class="col-12 col-md-6">
+                <div class="glass-card p-4 h-100 border-start border-4 border-info">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <span class="badge bg-info bg-opacity-25 text-info px-3 py-2 fs-6">
+                            <i class="fa-solid fa-temperature-low me-1"></i> Minimum Occurrence
+                        </span>
+                        <span class="fs-4 fw-bold text-info">{{ ts.min_info.temperature if ts.min_info.temperature is not none else 'N/A' }} °C</span>
+                    </div>
+                    <p class="text-secondary mb-1">Exact Time of Lowest Temperature:</p>
+                    <h4 class="fw-bold text-light mb-0">
+                        {{ ts.min_info.formatted_time if ts.min_info.formatted_time else 'No readings' }}
+                    </h4>
+                </div>
+            </div>
+        </div>
+
+        <!-- Matplotlib Hourly Average Temperature Chart & Table -->
+        <div class="row g-4">
+            <div class="col-12 col-lg-7">
+                <div class="glass-card p-4 h-100 text-center">
+                    <h5 class="fw-semibold mb-3 text-start">
+                        <i class="fa-solid fa-chart-column me-2 text-indigo"></i> Hourly Average Temperature (Matplotlib Bar Chart)
+                    </h5>
+                    <img src="{{ url_for('static', filename='charts/hourly_averages.png') }}?v={{ range(1, 100000) | random }}" 
+                         alt="Matplotlib Hourly Average Temperature Chart" class="img-fluid rounded-3 shadow">
+                </div>
+            </div>
+
+            <div class="col-12 col-lg-5">
+                <div class="glass-card h-100">
+                    <div class="glass-card-header">
+                        <h5 class="mb-0 fw-semibold">Hourly Averages Table</h5>
+                    </div>
+                    <div class="table-responsive" style="max-height: 340px; overflow-y: auto;">
+                        <table class="table table-custom">
+                            <thead>
+                                <tr>
+                                    <th>Hour Window</th>
+                                    <th>Average Temp (°C)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% if ts.hourly_averages %}
+                                    {% for item in ts.hourly_averages %}
+                                    <tr>
+                                        <td class="fw-medium"><i class="fa-regular fa-clock me-2 text-secondary"></i> {{ item.hour }}</td>
+                                        <td class="fw-bold text-info">{{ item.average_temperature }} °C</td>
+                                    </tr>
+                                    {% endfor %}
+                                {% else %}
+                                    <tr>
+                                        <td colspan="2" class="text-center py-4 text-secondary">No hourly data available for {{ selected_date }}.</td>
+                                    </tr>
+                                {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/bootstrap.bundle.min.js"></script>
+</body>
+</html>
