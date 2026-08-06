@@ -1,0 +1,171 @@
+/* Dark Glassmorphism Design System for Earthquake Analytics */
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
+
+:root {
+    --bg-gradient: linear-gradient(135deg, #090d16 0%, #1e1b4b 50%, #0f172a 100%);
+    --card-bg: rgba(30, 41, 59, 0.75);
+    --card-border: rgba(255, 255, 255, 0.1);
+    --card-hover-border: rgba(244, 63, 94, 0.4);
+    --accent-red: #f43f5e;
+    --accent-amber: #f59e0b;
+    --accent-blue: #38bdf8;
+    --accent-indigo: #6366f1;
+    --accent-emerald: #10b981;
+    --text-primary: #f8fafc;
+    --text-secondary: #94a3b8;
+    --glass-blur: blur(16px);
+}
+
+body {
+    font-family: 'Outfit', sans-serif;
+    background: var(--bg-gradient);
+    background-attachment: fixed;
+    color: var(--text-primary);
+    min-height: 100vh;
+    padding-bottom: 2.5rem;
+}
+
+/* Glassmorphism Cards */
+.glass-card {
+    background: var(--card-bg);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    border: 1px solid var(--card-border);
+    border-radius: 1.25rem;
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
+    transition: all 0.3s ease;
+}
+
+.glass-card:hover {
+    border-color: var(--card-hover-border);
+}
+
+.glass-card-header {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    padding: 1.25rem 1.5rem;
+}
+
+/* Navbar */
+.navbar-custom {
+    background: rgba(15, 23, 42, 0.85);
+    backdrop-filter: var(--glass-blur);
+    border-bottom: 1px solid var(--card-border);
+}
+
+.navbar-brand {
+    font-weight: 800;
+    font-size: 1.4rem;
+    background: linear-gradient(135deg, var(--accent-red), var(--accent-amber));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+/* Indicator Metric Cards */
+.metric-card {
+    padding: 1.5rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.metric-card::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 4px;
+    height: 100%;
+    background: var(--accent-indigo);
+}
+
+.metric-card.red::after { background: var(--accent-red); }
+.metric-card.amber::after { background: var(--accent-amber); }
+.metric-card.blue::after { background: var(--accent-blue); }
+.metric-card.emerald::after { background: var(--accent-emerald); }
+
+.metric-value {
+    font-size: 2.5rem;
+    font-weight: 700;
+    line-height: 1.1;
+}
+
+.metric-label {
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-secondary);
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+/* Seismic Peak Day Hero Card */
+.peak-hero {
+    background: linear-gradient(135deg, rgba(244, 63, 94, 0.15) 0%, rgba(99, 102, 241, 0.15) 100%);
+    border: 1px solid rgba(244, 63, 94, 0.3);
+    padding: 1.75rem 2rem;
+    border-radius: 1.25rem;
+}
+
+/* Badges */
+.badge-mag-high {
+    background-color: rgba(244, 63, 94, 0.25);
+    color: #f43f5e;
+    border: 1px solid rgba(244, 63, 94, 0.4);
+}
+
+.badge-mag-mid {
+    background-color: rgba(245, 158, 11, 0.25);
+    color: #f59e0b;
+    border: 1px solid rgba(245, 158, 11, 0.4);
+}
+
+.badge-mag-low {
+    background-color: rgba(56, 189, 248, 0.25);
+    color: #38bdf8;
+    border: 1px solid rgba(56, 189, 248, 0.4);
+}
+
+/* Tables */
+.table-custom {
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.table-custom th {
+    background: rgba(15, 23, 42, 0.6);
+    color: var(--text-secondary);
+    font-weight: 600;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-bottom: 1px solid var(--card-border);
+    padding: 0.85rem 1rem;
+}
+
+.table-custom td {
+    padding: 0.85rem 1rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    vertical-align: middle;
+    font-size: 0.95rem;
+}
+
+.table-custom tbody tr:hover {
+    background: rgba(255, 255, 255, 0.04);
+}
+
+/* Buttons */
+.btn-custom-red {
+    background: linear-gradient(135deg, var(--accent-red), var(--accent-amber));
+    color: white;
+    border: none;
+    font-weight: 600;
+    padding: 0.6rem 1.25rem;
+    border-radius: 0.75rem;
+    box-shadow: 0 4px 14px 0 rgba(244, 63, 94, 0.39);
+    transition: all 0.2s ease;
+}
+
+.btn-custom-red:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px 0 rgba(244, 63, 94, 0.5);
+    color: white;
+}

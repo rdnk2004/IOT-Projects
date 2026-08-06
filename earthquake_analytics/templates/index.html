@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>USGS Earthquake Analytics & Time Series Dashboard</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
+    <!-- Custom Glassmorphism Styles -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+    <!-- Navigation Bar -->
+    <nav class="navbar navbar-expand-lg navbar-custom sticky-top">
+        <div class="container-fluid px-4">
+            <a class="navbar-brand d-flex align-items-center" href="/">
+                <i class="fa-solid fa-volcano me-2 text-danger"></i>
+                <span>USGS Seismic Analytics</span>
+            </a>
+            <div class="ms-auto d-flex align-items-center gap-3">
+                <span class="badge bg-danger bg-opacity-25 text-danger border border-danger px-3 py-2">
+                    <i class="fa-solid fa-satellite-dish me-1"></i> Live 7-Day Feed
+                </span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Container -->
+    <div class="container-fluid px-4 py-4">
+
+        <!-- Top Header & Controls -->
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
+            <div>
+                <h2 class="fw-extrabold mb-1">
+                    <i class="fa-solid fa-earth-americas text-danger me-2"></i> Global Earthquake Telemetry & Time Series Analysis
+                </h2>
+                <p class="text-secondary mb-0">
+                    Real-time seismic data feed processed via Pandas & Matplotlib • Source: USGS Earthquake Hazards Program
+                </p>
+            </div>
+            <div>
+                <button id="btn-refresh" class="btn btn-custom-red">
+                    <i class="fa-solid fa-arrows-rotate me-1"></i> Refresh USGS Feed
+                </button>
+            </div>
+        </div>
+
+        <!-- Peak Seismic Activity Day Banner -->
+        <div class="glass-card peak-hero mb-4">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+                <div>
+                    <span class="badge bg-danger text-white px-3 py-1 uppercase mb-2 fw-semibold">
+                        <i class="fa-solid fa-bolt me-1"></i> Peak Seismic Activity Occurrence
+                    </span>
+                    <h3 class="fw-bold text-light mb-1">
+                        Highest Activity Date: <span class="text-danger">{{ ts.peak_day if ts.peak_day else 'N/A' }}</span>
+                    </h3>
+                    <p class="text-secondary mb-0">
+                        Recorded a maximum volume of <strong class="text-light fs-5">{{ ts.peak_count }}</strong> earthquakes in a single 24-hour UTC day window.
+                    </p>
+                </div>
+                <div class="text-md-end">
+                    <div class="fs-1 fw-bold text-danger">{{ stats.total_count }}</div>
+                    <div class="text-secondary small fw-medium text-uppercase">Total 7-Day Events</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Statistical Analysis Cards (7 Mandatory Metrics) -->
+        <h5 class="fw-bold text-light mb-3">
+            <i class="fa-solid fa-calculator text-amber me-2"></i> Magnitude Statistical Indicators (Pandas Analysis)
+        </h5>
+
+        <div class="row g-3 mb-4">
+            <!-- Total Earthquakes -->
+            <div class="col-6 col-md-3 col-xl-2">
+                <div class="glass-card metric-card red h-100">
+                    <div class="metric-label">Total Events</div>
+                    <div class="metric-value text-danger">{{ stats.total_count }}</div>
+                    <div class="text-secondary small mt-1">7-Day Count</div>
+                </div>
+            </div>
+
+            <!-- Mean Magnitude -->
+            <div class="col-6 col-md-3 col-xl-2">
+                <div class="glass-card metric-card blue h-100">
+                    <div class="metric-label">Mean Mag</div>
+                    <div class="metric-value text-info">{{ stats.mean_magnitude }} <span class="fs-6">M</span></div>
+                    <div class="text-secondary small mt-1">Average Level</div>
+                </div>
+            </div>
+
+            <!-- Median Magnitude -->
+            <div class="col-6 col-md-3 col-xl-2">
+                <div class="glass-card metric-card emerald h-100">
+                    <div class="metric-label">Median Mag</div>
+                    <div class="metric-value text-emerald">{{ stats.median_magnitude }} <span class="fs-6">M</span></div>
+                    <div class="text-secondary small mt-1">50th Percentile</div>
+                </div>
+            </div>
+
+            <!-- Standard Deviation -->
+            <div class="col-6 col-md-3 col-xl-2">
+                <div class="glass-card metric-card amber h-100">
+                    <div class="metric-label">Std Deviation</div>
+                    <div class="metric-value text-amber">{{ stats.std_dev }}</div>
+                    <div class="text-secondary small mt-1">Sample Std Dev</div>
+                </div>
+            </div>
+
+            <!-- Variance -->
+            <div class="col-6 col-md-3 col-xl-2">
+                <div class="glass-card metric-card emerald h-100">
+                    <div class="metric-label">Variance</div>
+                    <div class="metric-value text-emerald">{{ stats.variance }}</div>
+                    <div class="text-secondary small mt-1">Sample Variance</div>
+                </div>
+            </div>
+
+            <!-- Max & Min Magnitude Range -->
+            <div class="col-12 col-md-6 col-xl-2">
+                <div class="glass-card metric-card red h-100 d-flex flex-column justify-content-center">
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <span class="metric-label mb-0">Max Mag:</span>
+                        <span class="fs-4 fw-bold text-danger">{{ stats.max_magnitude }} M</span>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="metric-label mb-0">Min Mag:</span>
+                        <span class="fs-4 fw-bold text-info">{{ stats.min_magnitude }} M</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Matplotlib Visualizations Section -->
+        <h5 class="fw-bold text-light mb-3">
+            <i class="fa-solid fa-chart-line text-info me-2"></i> Matplotlib Time Series & Strongest Earthquakes Visualizations
+        </h5>
+
+        <div class="row g-4 mb-4">
+            <!-- Line Chart: Daily Earthquake Occurrences -->
+            <div class="col-12 col-lg-6">
+                <div class="glass-card h-100">
+                    <div class="glass-card-header d-flex justify-content-between align-items-center">
+                        <h6 class="mb-0 fw-bold text-light">
+                            <i class="fa-solid fa-chart-line text-info me-2"></i> Daily Earthquake Occurrences (Line Chart)
+                        </h6>
+                        <span class="badge bg-dark text-secondary">Matplotlib Generated</span>
+                    </div>
+                    <div class="p-3 text-center">
+                        <img src="{{ url_for('static', filename='charts/daily_occurrences.png') }}?v={{ range(1, 100000) | random }}" 
+                             alt="Daily Earthquake Occurrences Line Chart" class="img-fluid rounded-3 shadow">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bar Chart: Top 10 Strongest Earthquakes -->
+            <div class="col-12 col-lg-6">
+                <div class="glass-card h-100">
+                    <div class="glass-card-header d-flex justify-content-between align-items-center">
+                        <h6 class="mb-0 fw-bold text-light">
+                            <i class="fa-solid fa-chart-bar text-warning me-2"></i> Top 10 Strongest Earthquakes (Bar Chart)
+                        </h6>
+                        <span class="badge bg-dark text-secondary">Matplotlib Generated</span>
+                    </div>
+                    <div class="p-3 text-center">
+                        <img src="{{ url_for('static', filename='charts/top10_strongest.png') }}?v={{ range(1, 100000) | random }}" 
+                             alt="Top 10 Strongest Earthquakes Bar Chart" class="img-fluid rounded-3 shadow">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Summary of Recent Seismic Activity -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="glass-card p-4">
+                    <h5 class="fw-bold text-light mb-3">
+                        <i class="fa-solid fa-file-lines text-emerald me-2"></i> Recent Seismic Activity Summary Report
+                    </h5>
+                    <div class="p-3 rounded-3 bg-dark bg-opacity-50 border border-secondary">
+                        <ul class="mb-0 ps-3">
+                            {% for line in summary %}
+                            <li class="mb-2 text-light fs-6">{{ line }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Top 10 Strongest Earthquakes Detailed Table -->
+        <div class="row">
+            <div class="col-12">
+                <div class="glass-card">
+                    <div class="glass-card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0 fw-bold text-light">
+                            <i class="fa-solid fa-list-ol text-danger me-2"></i> Top 10 Strongest Earthquakes Breakdown
+                        </h5>
+                        <span class="text-secondary small">Click USGS Event Link for Map Details</span>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-custom">
+                            <thead>
+                                <tr>
+                                    <th>Magnitude</th>
+                                    <th>Location Description</th>
+                                    <th>Timestamp (UTC)</th>
+                                    <th>Depth (km)</th>
+                                    <th>Details</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% if top10 %}
+                                    {% for eq in top10 %}
+                                    <tr>
+                                        <td>
+                                            {% if eq.magnitude >= 5.0 %}
+                                                <span class="badge badge-mag-high fs-6 px-3 py-1">M {{ eq.magnitude }}</span>
+                                            {% elif eq.magnitude >= 3.5 %}
+                                                <span class="badge badge-mag-mid fs-6 px-3 py-1">M {{ eq.magnitude }}</span>
+                                            {% else %}
+                                                <span class="badge badge-mag-low fs-6 px-3 py-1">M {{ eq.magnitude }}</span>
+                                            {% endif %}
+                                        </td>
+                                        <td class="fw-medium text-light">{{ eq.place }}</td>
+                                        <td class="text-secondary">{{ eq.formatted_time }}</td>
+                                        <td class="text-info">{{ eq.depth_km }} km</td>
+                                        <td>
+                                            <a href="{{ eq.url }}" target="_blank" class="btn btn-outline-light btn-sm rounded-3">
+                                                <i class="fa-solid fa-arrow-up-right-from-square me-1"></i> USGS Link
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                {% else %}
+                                    <tr>
+                                        <td colspan="5" class="text-center py-4 text-secondary">No earthquake data available.</td>
+                                    </tr>
+                                {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Script for manual refresh -->
+    <script>
+        document.getElementById('btn-refresh').addEventListener('click', async () => {
+            const btn = document.getElementById('btn-refresh');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-1"></i> Updating...';
+            try {
+                const res = await fetch('/api/refresh', { method: 'POST' });
+                const data = await res.json();
+                if (data.status === 'success') {
+                    window.location.reload();
+                }
+            } catch (e) {
+                console.error(e);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-arrows-rotate me-1"></i> Refresh USGS Feed';
+            }
+        });
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/bootstrap.bundle.min.js"></script>
+</body>
+</html>
