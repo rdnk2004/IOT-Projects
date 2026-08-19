@@ -110,22 +110,20 @@ IOT-Projects/
 
 ---
 
-### ⚡ 4. IoT-CAE1 - MQTT Telemetry & Cloud Integration (`/IoT-CAE1`)
-> **Lightweight MQTT Publisher/Subscriber Pipeline & Streamlit Control Panel**
+### ⚡ 4. IoT-CAE1 - Multi-Protocol IoT & Telemetry Lab (`/IoT-CAE1`)
+> **Modular Suite: Supabase Cloud Telemetry, MQTT Pub/Sub Pipeline & ThingsBoard Integration**
 
-**IoT-CAE1** demonstrates core IoT pub/sub networking using MQTT brokers (HiveMQ Public & ThingsBoard Cloud) coupled with a Streamlit telemetry monitoring panel.
+**IoT-CAE1** provides three modular IoT programs showcasing pub/sub networking, relational cloud database persistence, and commercial IoT cloud platform integration:
 
-- **Key Features:**
-  - **MQTT Publisher (`publisher.py`):** Publishes sensor metrics to HiveMQ public broker (`broker.hivemq.com`).
-  - **MQTT Subscriber (`subscriber.py`):** Listens to live topics and prints incoming payload streams.
-  - **ThingsBoard Cloud Connector (`thingsboard.py`):** Streams JSON telemetry payloads directly to ThingsBoard IoT platform (`eu.thingsboard.cloud`).
-  - **Streamlit Telemetry Board (`app.py`):** Real-time web visualization fetching data stored in Supabase tables.
+- **1. Supabase Temperature Monitor (`/supabase-temp-monitor`):** Real-time Streamlit dashboard (`app.py`) fetching telemetry stored in Supabase Cloud, populated by automated sensor script (`send_temp.py`).
+- **2. MQTT Pub/Sub Pipeline (`/mqtt-pub-sub`):** Lightweight publisher (`publisher.py`) and subscriber (`subscriber.py`) over standard MQTT via HiveMQ public broker.
+- **3. ThingsBoard Cloud Telemetry (`/thingsboard-telemetry`):** Authenticated device client (`thingsboard.py`) publishing JSON telemetry directly to ThingsBoard Cloud.
+
 - **Tech Stack:** Python, Paho MQTT, Streamlit, Supabase, Python-dotenv, Pandas.
 - **Quickstart:**
   ```bash
-  cd IoT-CAE1
-  pip install paho-mqtt streamlit supabase python-dotenv pandas
-  streamlit run app.py
+  cd IoT-CAE1/supabase-temp-monitor && streamlit run app.py
+  # Or explore mqtt-pub-sub / thingsboard-telemetry
   ```
 
 ---
