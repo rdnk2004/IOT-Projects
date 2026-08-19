@@ -1,4 +1,3 @@
-# pyrefly: ignore [missing-import]
 import paho.mqtt.client as mqtt
 broker = "broker.hivemq.com"
 topic = "rajagiri/iot/temp"

@@ -1,9 +1,7 @@
 import os
 import random
 import time
-# pyrefly: ignore [missing-import]
 from dotenv import load_dotenv
-# pyrefly: ignore [missing-import]
 from supabase import create_client
 load_dotenv()
 url = os.getenv("SUPABASE_URL")

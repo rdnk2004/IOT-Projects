@@ -1,11 +1,8 @@
 import json
+import os
 import random
 import time
-# pyrefly: ignore [missing-import]
 from dotenv import load_dotenv
-# pyrefly: ignore [missing-import]
-import os
-# pyrefly: ignore [missing-import]
 import paho.mqtt.client as mqtt 
 
 load_dotenv()
