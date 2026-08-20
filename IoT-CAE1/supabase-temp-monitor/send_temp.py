@@ -14,7 +14,6 @@ if not url or not key:
 
 supabase = create_client(url, key)
 print("Starting continuous temperature telemetry transmission to Supabase...")
-
 try:
     while True:
         temp = random.randint(25, 40)
